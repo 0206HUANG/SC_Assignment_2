@@ -105,20 +105,23 @@ export default function TasksPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-5xl mx-auto pb-12">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Tasks</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Tasks</h1>
+          <p className="text-sm text-slate-500 mt-1 font-medium">
+            {tasks.length} {tasks.length === 1 ? "task" : "tasks"} found
           </p>
         </div>
         <button
           type="button"
           onClick={handleNew}
-          className="px-3 py-2 text-sm rounded-md bg-brand-600 text-white hover:bg-brand-700"
+          className="group flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl bg-brand-600 text-white hover:bg-brand-500 shadow-sm hover:shadow-md hover:shadow-brand-500/20 transition-all duration-200"
         >
-          + New task
+          <svg className="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          New Task
         </button>
       </div>
 
@@ -129,27 +132,54 @@ export default function TasksPage() {
       />
 
       {error && (
-        <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2 mb-4">
+        <div className="flex items-center gap-3 text-sm text-red-600 bg-red-50/50 border border-red-200 rounded-xl px-4 py-3 mb-6 shadow-sm">
+          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           {error}
         </div>
       )}
 
       {loading ? (
-        <div className="text-sm text-slate-500 py-12 text-center">Loading…</div>
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+          <svg className="w-8 h-8 animate-spin text-brand-500 mb-4" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="text-sm font-medium animate-pulse">Loading tasks...</p>
+        </div>
       ) : tasks.length === 0 ? (
-        <div className="text-sm text-slate-500 py-12 text-center bg-white border border-dashed border-slate-300 rounded-lg">
-          No tasks match your filters. Try clearing them or creating a new task.
+        <div className="flex flex-col items-center justify-center py-20 bg-white/50 border border-dashed border-slate-300 rounded-2xl">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-1">No tasks found</h3>
+          <p className="text-sm text-slate-500 mb-6">Try adjusting your filters or create a new task.</p>
+          <button
+            type="button"
+            onClick={handleNew}
+            className="px-4 py-2 text-sm font-medium text-brand-600 bg-brand-50 hover:bg-brand-100 rounded-lg transition-colors"
+          >
+            Create your first task
+          </button>
         </div>
       ) : (
-        <div className="space-y-2">
-          {tasks.map((task) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onToggle={handleToggle}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+        <div className="space-y-4">
+          {tasks.map((task, index) => (
+            <div 
+              key={task.id} 
+              className="animate-fade-up opacity-0"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <TaskCard
+                task={task}
+                onToggle={handleToggle}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            </div>
           ))}
         </div>
       )}
