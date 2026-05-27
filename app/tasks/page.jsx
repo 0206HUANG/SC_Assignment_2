@@ -1,11 +1,26 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import TaskCard from "@/components/TaskCard";
 import TaskForm from "@/components/TaskForm";
 import TaskFilters from "@/components/TaskFilters";
 
+// Wrap in Suspense because useSearchParams requires it during static rendering.
 export default function TasksPage() {
+  return (
+    <Suspense fallback={null}>
+      <TasksPageInner />
+    </Suspense>
+  );
+}
+
+function TasksPageInner() {
+  const searchParams = useSearchParams();
+  // Initial filter values: pull categoryId from URL so links like
+  // /tasks?categoryId=3 (from the Categories page) pre-apply the filter.
+  const initialCategoryId = searchParams.get("categoryId") || "";
+
   const [tasks, setTasks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,10 +29,17 @@ export default function TasksPage() {
     search: "",
     status: "",
     priority: "",
-    categoryId: "",
+    categoryId: initialCategoryId,
   });
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  // Keep the filter in sync if the URL changes (e.g. user clicks a different
+  // category card while already on /tasks).
+  useEffect(() => {
+    const fromUrl = searchParams.get("categoryId") || "";
+    setFilters((f) => (f.categoryId === fromUrl ? f : { ...f, categoryId: fromUrl }));
+  }, [searchParams]);
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);

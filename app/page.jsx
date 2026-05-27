@@ -54,6 +54,7 @@ const PRIORITY_COLORS = {
 export default function DashboardPage() {
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -63,21 +64,30 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, tasksRes] = await Promise.all([
+      const [statsRes, tasksRes, catsRes] = await Promise.all([
         fetch("/api/tasks/stats"),
         fetch("/api/tasks?status=PENDING"),
+        fetch("/api/categories"),
       ]);
       const statsBody = await statsRes.json();
       const tasksBody = await tasksRes.json();
+      const catsBody = await catsRes.json();
       if (!statsRes.ok) throw new Error(statsBody.error || "Stats failed");
       if (!tasksRes.ok) throw new Error(tasksBody.error || "Tasks failed");
+      if (!catsRes.ok) throw new Error(catsBody.error || "Categories failed");
       setStats(statsBody.data);
       setRecent(tasksBody.data.slice(0, 5));
+      setCategories(catsBody.data);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleCloseForm() {
+    setFormOpen(false);
+    setEditing(null);
   }
 
   useEffect(() => {
