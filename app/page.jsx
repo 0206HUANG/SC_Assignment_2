@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import TaskCard from "@/components/TaskCard";
+import TaskForm from "@/components/TaskForm";
 
 function StatCard({ label, value, accent }) {
   return (
@@ -55,6 +56,8 @@ export default function DashboardPage() {
   const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -91,9 +94,19 @@ export default function DashboardPage() {
     load();
   }
 
+  async function handleEdit(task) {
+  setEditing(task);
+  setFormOpen(true);
+  }
+
   async function handleDelete(task) {
     if (!confirm(`Delete "${task.title}"?`)) return;
     await fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
+    load();
+  }
+
+  async function handleSaved() {
+    handleCloseForm();
     load();
   }
 
@@ -195,10 +208,11 @@ export default function DashboardPage() {
               <div className="space-y-2">
                 {recent.map((task) => (
                   <TaskCard
-                    key={task.id}
-                    task={task}
-                    onToggle={handleToggle}
-                    onDelete={handleDelete}
+                  key={task.id}
+                  task={task}
+                  onToggle={handleToggle}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
                   />
                 ))}
               </div>
@@ -206,6 +220,13 @@ export default function DashboardPage() {
           </div>
         </>
       )}
+      <TaskForm
+      open={formOpen}
+      initial={editing}
+      categories={categories}
+      onClose={handleCloseForm}
+      onSaved={handleSaved}
+      />
     </div>
   );
 }
